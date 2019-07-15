@@ -1,6 +1,6 @@
 # Docker image for ACE Game engine
 
-FROM ozzyboshi/bebbo-amiga-gcc:latest as build-env
+FROM ozzyboshi/bebbo-amiga-gcc:20190715 as build-env
 
 ## Start of ACE release
 FROM ubuntu:18.04 as ace-env
