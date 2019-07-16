@@ -32,13 +32,11 @@ RUN  cmake .. && make
 # fix utils path
 WORKDIR /root
 RUN mkdir ACE/tools/palette_conv && cp ACE/tools/bin/palette_conv /root/ACE/tools/palette_conv/palette_conv
-WORKDIR /root/ACE/tools/bitmap_conv/
-RUN gcc bitmap_conv.c lodepng.c -std=c99 -Wall -o bitmap_conv
 
 WORKDIR /root
 RUN cd ACE/ && mkdir build
 WORKDIR /root/ACE/build
-RUN M68K_TOOLCHAIN_PATH=/bin cmake .. -DCMAKE_TOOLCHAIN_FILE=/root/AmigaCMakeCrossToolchains/m68k.cmake -DM68K_TOOLCHAIN_PATH=/opt/amiga -DM68K_CPU=68000 -DM68K_FPU=soft
+RUN M68K_TOOLCHAIN_PATH=/bin cmake .. -DCMAKE_TOOLCHAIN_FILE=/root/AmigaCMakeCrossToolchains/m68k-amigaos.cmake -DM68K_TOOLCHAIN_PATH=/opt/amiga -DM68K_CPU=68000 -DM68K_FPU=soft
 RUN make
 ## End of ace release
 
@@ -64,7 +62,7 @@ RUN git clone https://github.com/AmigaPorts/AmigaCMakeCrossToolchains.git
 WORKDIR /root
 RUN cd ACE/ && mkdir build
 WORKDIR /root/ACE/build
-RUN M68K_TOOLCHAIN_PATH=/bin cmake .. -DCMAKE_TOOLCHAIN_FILE=/root/AmigaCMakeCrossToolchains/m68k.cmake -DM68K_TOOLCHAIN_PATH=/opt/amiga -DM68K_CPU=68000 -DM68K_FPU=soft -DCMAKE_BUILD_TYPE=Debug -DACE_DEBUG=1
+RUN M68K_TOOLCHAIN_PATH=/bin cmake .. -DCMAKE_TOOLCHAIN_FILE=/root/AmigaCMakeCrossToolchains/m68k-amigaos.cmake -DM68K_TOOLCHAIN_PATH=/opt/amiga -DM68K_CPU=68000 -DM68K_FPU=soft -DCMAKE_BUILD_TYPE=Debug -DACE_DEBUG=1
 RUN make
 ## End of ace debug
 
@@ -88,7 +86,7 @@ RUN git clone https://github.com/AmigaPorts/AmigaCMakeCrossToolchains.git
 WORKDIR /root
 RUN cd ACE/ && mkdir build
 WORKDIR /root/ACE/build
-RUN M68K_TOOLCHAIN_PATH=/bin cmake .. -DCMAKE_TOOLCHAIN_FILE=/root/AmigaCMakeCrossToolchains/m68k.cmake -DM68K_TOOLCHAIN_PATH=/opt/amiga -DM68K_CPU=68000 -DM68K_FPU=soft -DCMAKE_BUILD_TYPE=Release
+RUN M68K_TOOLCHAIN_PATH=/bin cmake .. -DCMAKE_TOOLCHAIN_FILE=/root/AmigaCMakeCrossToolchains/m68k-amigaos.cmake -DM68K_TOOLCHAIN_PATH=/opt/amiga -DM68K_CPU=68000 -DM68K_FPU=soft -DCMAKE_BUILD_TYPE=Release
 RUN make
 ## End of ace release
 
@@ -105,7 +103,6 @@ COPY --from=ace-env /root/ACE/build/libace.a /opt/amiga/lib/
 COPY --from=acedebug-env /root/ACE/build/libace.a /opt/amiga/lib/libacedebug.a
 COPY --from=acerelease-env /root/ACE/build/libace.a /opt/amiga/lib/libacerelease.a
 COPY --from=ace-env /root/ACE/tools/bin/* /usr/local/bin/
-COPY --from=ace-env /root/ACE/tools/bitmap_conv/bitmap_conv /usr/local/bin/
 COPY --from=ace-env /root/ACE/include/ace /opt/amiga/include/ace
 COPY --from=ace-env /root/ACE/include/fixmath /opt/amiga/include/fixmath
 
