@@ -10,7 +10,13 @@ COPY --from=build-env /opt/amiga ./opt/amiga
 ARG ace_branch=master
 
 ENV DEBIAN_FRONTEND noninteractive
-RUN apt-get update && apt-get -y install git make g++ gcc cmake && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get -y install git make g++ gcc cmake wget && rm -rf /var/lib/apt/lists/*
+
+#ilbm2raw
+WORKDIR /root
+RUN wget 'https://github.com/Ozzyboshi/ilbm2raw/archive/v0.1.tar.gz'
+RUN tar -xvzpf v0.1.tar.gz
+RUN cd ilbm2raw-0.1/ && ./configure && make && make install
 
 WORKDIR /root
 
@@ -38,6 +44,9 @@ RUN cd ACE/ && mkdir build
 WORKDIR /root/ACE/build
 RUN M68K_TOOLCHAIN_PATH=/bin cmake .. -DCMAKE_TOOLCHAIN_FILE=/root/AmigaCMakeCrossToolchains/m68k-amigaos.cmake -DM68K_TOOLCHAIN_PATH=/opt/amiga -DM68K_CPU=68000 -DM68K_FPU=soft
 RUN make
+
+
+
 ## End of ace release
 
 ## Start of ACE debug
@@ -105,6 +114,7 @@ COPY --from=acerelease-env /root/ACE/build/libace.a /opt/amiga/lib/libacerelease
 COPY --from=ace-env /root/ACE/tools/bin/* /usr/local/bin/
 COPY --from=ace-env /root/ACE/include/ace /opt/amiga/include/ace
 COPY --from=ace-env /root/ACE/include/fixmath /opt/amiga/include/fixmath
+COPY --from=ace-env /usr/local/bin/ilbm2raw /usr/local/bin/ilbm2raw
 
 # Copy incbin
 COPY incbin.sh /usr/local/bin/
