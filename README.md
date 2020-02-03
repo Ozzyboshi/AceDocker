@@ -1,4 +1,7 @@
 # AceDocker
+
+2020/02/03 - New Ace and new bebbo's gcc
+
 2019/10/06 - Added ilbm2raw
 
 2019/09/05 - Updated ACE (september 4th broken)
