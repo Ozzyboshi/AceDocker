@@ -15,8 +15,8 @@ RUN apt-get update && apt-get -y install git make g++ gcc cmake wget && rm -rf /
 #ilbm2raw
 WORKDIR /root
 RUN wget 'https://github.com/Ozzyboshi/ilbm2raw/archive/v0.1.tar.gz'
-RUN tar -xvzpf v0.1.tar.gz
-RUN cd ilbm2raw-0.1/ && ./configure && make && make install
+RUN tar -xvzpf v0.2.tar.gz
+RUN cd ilbm2raw-0.2/ && ./configure && make && make install
 
 WORKDIR /root
 
