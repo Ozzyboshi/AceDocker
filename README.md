@@ -1,5 +1,7 @@
 # AceDocker
 
+2020/03/07 - New bebbo compiler + new ilbm2raw + fix ace build on dockerallinone only
+
 2020/02/15 - New ilbm2raw
 
 2020/02/03 - New Ace and new bebbo's gcc
