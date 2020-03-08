@@ -1,8 +1,9 @@
 # Docker image for ACE Game engine
 
-FROM ozzyboshi/bebbo-amiga-gcc:20190715 as build-env
+FROM ozzyboshi/bebbo-amiga-gcc:20200203 as build-env
 
 ## Start of ACE release
+
 FROM ubuntu:18.04 as ace-env
 
 COPY --from=build-env /opt/amiga ./opt/amiga
@@ -42,14 +43,14 @@ RUN mkdir ACE/tools/palette_conv && cp ACE/tools/bin/palette_conv /root/ACE/tool
 WORKDIR /root
 RUN cd ACE/ && mkdir build
 WORKDIR /root/ACE/build
-RUN M68K_TOOLCHAIN_PATH=/bin cmake .. -DCMAKE_TOOLCHAIN_FILE=/root/AmigaCMakeCrossToolchains/m68k-amigaos.cmake -DM68K_TOOLCHAIN_PATH=/opt/amiga -DM68K_CPU=68000 -DM68K_FPU=soft
+RUN M68K_TOOLCHAIN_PATH=/bin cmake .. -DCMAKE_TOOLCHAIN_FILE=/root/AmigaCMakeCrossToolchains/m68k-amigaos.cmake -DM68K_TOOLCHAIN_PATH=/opt/amiga -DTOOLCHAIN_PREFIX=m68k-amigaos  -DTOOLCHAIN_PREFIX_DASHED=m68k-amigaos- -DM68K_CPU=68000 -DM68K_FPU=soft
 RUN make
-
-
 
 ## End of ace release
 
+
 ## Start of ACE debug
+
 FROM ubuntu:18.04 as acedebug-env
 
 COPY --from=build-env /opt/amiga ./opt/amiga
@@ -97,14 +98,14 @@ RUN cd ACE/ && mkdir build
 WORKDIR /root/ACE/build
 RUN M68K_TOOLCHAIN_PATH=/bin cmake .. -DCMAKE_TOOLCHAIN_FILE=/root/AmigaCMakeCrossToolchains/m68k-amigaos.cmake -DM68K_TOOLCHAIN_PATH=/opt/amiga -DM68K_CPU=68000 -DM68K_FPU=soft -DCMAKE_BUILD_TYPE=Release
 RUN make
-## End of ace release
 
+## End of ace release
 
 FROM ubuntu:18.04
 
 MAINTAINER Ozzyboshi <gun101@email.it>
 
-# solo per il packaging del gioco
+# game packaging only
 RUN apt-get update && apt-get -y install libmpc3 make autoconf && rm -rf /var/lib/apt/lists/*
 
 COPY --from=build-env /opt/amiga ./opt/amiga
