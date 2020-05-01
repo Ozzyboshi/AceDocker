@@ -1,5 +1,7 @@
 # AceDocker
 
+2020/05/01 - Updated ACE + showcase in container
+
 2020/04/27 - Updated ACE (fixed keypresses on fast amigas)
 
 2020/03/11 - Fixed ace build + new gcc compiler
