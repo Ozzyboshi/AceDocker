@@ -46,7 +46,12 @@ WORKDIR /root/ACE/build
 RUN M68K_TOOLCHAIN_PATH=/bin cmake .. -DCMAKE_TOOLCHAIN_FILE=/root/AmigaCMakeCrossToolchains/m68k-amigaos.cmake -DM68K_TOOLCHAIN_PATH=/opt/amiga -DTOOLCHAIN_PREFIX=m68k-amigaos  -DTOOLCHAIN_PREFIX_DASHED=m68k-amigaos- -DM68K_CPU=68000 -DM68K_FPU=soft
 RUN make
 
-## End of ace release
+WORKDIR /root
+RUN cd ACE/showcase && mkdir build
+WORKDIR /root/ACE/showcase/build
+RUN M68K_TOOLCHAIN_PATH=/bin cmake .. -DCMAKE_TOOLCHAIN_FILE=/root/AmigaCMakeCrossToolchains/m68k-amigaos.cmake -DM68K_TOOLCHAIN_PATH=/opt/amiga -DTOOLCHAIN_PREFIX=m68k-amigaos -DTOOLCHAIN_PREFIX_DASHED=m68k-amigaos- -DM68K_CPU=68000 -DM68K_FPU=soft
+RUN make
+## End of ace regular
 
 
 ## Start of ACE debug
@@ -110,6 +115,7 @@ RUN apt-get update && apt-get -y install libmpc3 make autoconf && rm -rf /var/li
 
 COPY --from=build-env /opt/amiga ./opt/amiga
 COPY --from=ace-env /root/ACE/build/libace.a /opt/amiga/lib/
+COPY --from=ace-env /root/ACE/showcase /opt/amiga/showcase
 COPY --from=acedebug-env /root/ACE/build/libace.a /opt/amiga/lib/libacedebug.a
 COPY --from=acerelease-env /root/ACE/build/libace.a /opt/amiga/lib/libacerelease.a
 COPY --from=ace-env /root/ACE/tools/bin/* /usr/local/bin/
