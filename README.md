@@ -1,4 +1,5 @@
 # AceDocker
+2020/05/08 - Updated ACE (commits 1f65aabdaa248f9a60f4db7bf8bd823a3d7646ed 27f64cdaf3ae8ff098754d857f37a26ff713b728 a678c942d56233d6a8fcf7b6751c63b49ce312b2)
 
 2020/05/01 - Updated ACE + showcase in container
 
