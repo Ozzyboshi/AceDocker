@@ -123,8 +123,9 @@ COPY --from=ace-env /root/ACE/include/ace /opt/amiga/include/ace
 COPY --from=ace-env /root/ACE/include/fixmath /opt/amiga/include/fixmath
 COPY --from=ace-env /usr/local/bin/ilbm2raw /usr/local/bin/ilbm2raw
 
-# Copy incbin
+# Copy incbin and incbin_fast
 COPY incbin.sh /usr/local/bin/
+COPY incbin_fast.sh /usr/local/bin/
 
 # Copy exe2adf
 COPY exe2adf-linux64bit /usr/local/bin/
