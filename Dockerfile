@@ -127,6 +127,9 @@ COPY --from=ace-env /usr/local/bin/ilbm2raw /usr/local/bin/ilbm2raw
 COPY incbin.sh /usr/local/bin/
 COPY incbin_fast.sh /usr/local/bin/
 
+# COPY ACE MAKE TOOL FOR FAST BOOTSTRAP NEW PROJECTS
+COPY ace_make_tool.sh /usr/local/bin/
+
 # Copy exe2adf
 COPY exe2adf-linux64bit /usr/local/bin/
 
