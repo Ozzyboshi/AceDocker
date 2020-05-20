@@ -37,6 +37,6 @@ bytes=`od -An -t x1 -v "$1"`
 	echo
 	echo "};"
 	echo
-	echo "const size_t $3_size = sizeof($3_data);"
+	echo "const size_t $3_size = sizeof($3_data_fast);"
 ) > "$2"
 
