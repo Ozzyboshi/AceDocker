@@ -66,7 +66,7 @@ echo "
 
 void genericCreate(void) {
   // Here goes your startup code
-    logWrite("Hello, Amiga!\n");
+    logWrite(\"Hello, Amiga!\n\");
       keyCreate(); // We'll use keyboard
         // Initialize gamestate
 	  gamePushState(gameGsCreate, gameGsLoop, gameGsDestroy);
@@ -81,7 +81,7 @@ void genericCreate(void) {
 void genericDestroy(void) {
   // Here goes your cleanup code
     keyDestroy(); // We don't need it anymore
-      logWrite("Goodbye, Amiga!\n");
+      logWrite(\"Goodbye, Amiga!\n\");
       }
 " >> ${SRCDIR}/main.c
 echo "${SRCDIR}/main.c created"
