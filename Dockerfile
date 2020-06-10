@@ -1,5 +1,12 @@
 # Docker image for ACE Game engine
 
+### Choose here your unix functions
+# "nix20" 
+# "nix13" 
+# "clib2" 
+# "ixemul" 
+# "newlib"
+
 FROM ozzyboshi/bebbo-amiga-gcc:20200526 as build-env
 
 ## Start of ACE release
@@ -9,6 +16,7 @@ FROM ubuntu:18.04 as ace-env
 COPY --from=build-env /opt/amiga ./opt/amiga
 
 ARG ace_branch=master
+ARG ace_crt_function=nix20
 
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update && apt-get -y install git make g++ gcc cmake wget && rm -rf /var/lib/apt/lists/*
@@ -43,13 +51,14 @@ RUN mkdir ACE/tools/palette_conv && cp ACE/tools/bin/palette_conv /root/ACE/tool
 WORKDIR /root
 RUN cd ACE/ && mkdir build
 WORKDIR /root/ACE/build
-RUN M68K_TOOLCHAIN_PATH=/bin cmake .. -DM68K_CRT=nix13 -DCMAKE_TOOLCHAIN_FILE=/root/AmigaCMakeCrossToolchains/m68k-amigaos.cmake -DTOOLCHAIN_PATH=/opt/amiga -DTOOLCHAIN_PREFIX=m68k-amigaos -DM68K_CPU=68000 -DM68K_FPU=soft
-RUN make
+RUN M68K_TOOLCHAIN_PATH=/bin cmake .. -DM68K_CRT=${ace_crt_function} -DCMAKE_TOOLCHAIN_FILE=/root/AmigaCMakeCrossToolchains/m68k-amigaos.cmake -DTOOLCHAIN_PATH=/opt/amiga -DTOOLCHAIN_PREFIX=m68k-amigaos -DM68K_CPU=68000 -DM68K_FPU=soft
+RUN M68K_TOOLCHAIN_PATH=/bin cmake .. -DM68K_CRT=${ace_crt_function} -DCMAKE_TOOLCHAIN_FILE=/root/AmigaCMakeCrossToolchains/m68k-amigaos.cmake -DTOOLCHAIN_PATH=/opt/amiga -DTOOLCHAIN_PREFIX=m68k-amigaos -DM68K_CPU=68000 -DM68K_FPU=soft
+RUN make --trace
 
 WORKDIR /root
 RUN cd ACE/showcase && mkdir build
 WORKDIR /root/ACE/showcase/build
-RUN M68K_TOOLCHAIN_PATH=/bin cmake .. -DM68K_CRT=nix13 -DCMAKE_TOOLCHAIN_FILE=/root/AmigaCMakeCrossToolchains/m68k-amigaos.cmake -DTOOLCHAIN_PATH=/opt/amiga -DTOOLCHAIN_PREFIX=m68k-amigaos -DM68K_CPU=68000 -DM68K_FPU=soft
+RUN M68K_TOOLCHAIN_PATH=/bin cmake .. -DM68K_CRT=${ace_crt_function} -DCMAKE_TOOLCHAIN_FILE=/root/AmigaCMakeCrossToolchains/m68k-amigaos.cmake -DTOOLCHAIN_PATH=/opt/amiga -DTOOLCHAIN_PREFIX=m68k-amigaos -DM68K_CPU=68000 -DM68K_FPU=soft
 RUN make
 ## End of ace regular
 
@@ -61,6 +70,7 @@ FROM ubuntu:18.04 as acedebug-env
 COPY --from=build-env /opt/amiga ./opt/amiga
 
 ARG ace_branch=master
+ARG ace_crt_function=nix20
 
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update && apt-get -y install git make g++ gcc cmake && rm -rf /var/lib/apt/lists/*
@@ -77,8 +87,9 @@ RUN git clone https://github.com/AmigaPorts/AmigaCMakeCrossToolchains.git
 WORKDIR /root
 RUN cd ACE/ && mkdir build
 WORKDIR /root/ACE/build
-RUN M68K_TOOLCHAIN_PATH=/bin cmake .. -DM68K_CRT=nix13 -DCMAKE_TOOLCHAIN_FILE=/root/AmigaCMakeCrossToolchains/m68k-amigaos.cmake -DTOOLCHAIN_PATH=/opt/amiga -DTOOLCHAIN_PREFIX=m68k-amigaos  -DM68K_CPU=68000 -DM68K_FPU=soft -DCMAKE_BUILD_TYPE=Debug -DACE_DEBUG=1
-RUN make
+RUN M68K_TOOLCHAIN_PATH=/bin cmake .. -DM68K_CRT=${ace_crt_function} -DCMAKE_TOOLCHAIN_FILE=/root/AmigaCMakeCrossToolchains/m68k-amigaos.cmake -DTOOLCHAIN_PATH=/opt/amiga -DTOOLCHAIN_PREFIX=m68k-amigaos  -DM68K_CPU=68000 -DM68K_FPU=soft -DCMAKE_BUILD_TYPE=Debug -DACE_DEBUG=1
+RUN M68K_TOOLCHAIN_PATH=/bin cmake .. -DM68K_CRT=${ace_crt_function} -DCMAKE_TOOLCHAIN_FILE=/root/AmigaCMakeCrossToolchains/m68k-amigaos.cmake -DTOOLCHAIN_PATH=/opt/amiga -DTOOLCHAIN_PREFIX=m68k-amigaos  -DM68K_CPU=68000 -DM68K_FPU=soft -DCMAKE_BUILD_TYPE=Debug -DACE_DEBUG=1
+RUN make --trace
 ## End of ace debug
 
 ## Start of ACE release
@@ -87,6 +98,7 @@ FROM ubuntu:18.04 as acerelease-env
 COPY --from=build-env /opt/amiga ./opt/amiga
 
 ARG ace_branch=master
+ARG ace_crt_function=nix20
 
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update && apt-get -y install git make g++ gcc cmake && rm -rf /var/lib/apt/lists/*
@@ -101,8 +113,9 @@ RUN git clone https://github.com/AmigaPorts/AmigaCMakeCrossToolchains.git
 WORKDIR /root
 RUN cd ACE/ && mkdir build
 WORKDIR /root/ACE/build
-RUN M68K_TOOLCHAIN_PATH=/bin cmake .. -DM68K_CRT=nix13 -DCMAKE_TOOLCHAIN_FILE=/root/AmigaCMakeCrossToolchains/m68k-amigaos.cmake -DTOOLCHAIN_PATH=/opt/amiga -DTOOLCHAIN_PREFIX=m68k-amigaos  -DM68K_CPU=68000 -DM68K_FPU=soft -DCMAKE_BUILD_TYPE=Release
-RUN make
+RUN M68K_TOOLCHAIN_PATH=/bin cmake .. -DCMAKE_TOOLCHAIN_FILE=/root/AmigaCMakeCrossToolchains/m68k-amigaos.cmake -DTOOLCHAIN_PATH=/opt/amiga -DTOOLCHAIN_PREFIX=m68k-amigaos  -DM68K_CPU=68000 -DM68K_FPU=soft -DCMAKE_BUILD_TYPE=Release -DM68K_CRT=${ace_crt_function}
+RUN M68K_TOOLCHAIN_PATH=/bin cmake .. -DCMAKE_TOOLCHAIN_FILE=/root/AmigaCMakeCrossToolchains/m68k-amigaos.cmake -DTOOLCHAIN_PATH=/opt/amiga -DTOOLCHAIN_PREFIX=m68k-amigaos  -DM68K_CPU=68000 -DM68K_FPU=soft -DCMAKE_BUILD_TYPE=Release -DM68K_CRT=${ace_crt_function}
+RUN make --trace
 
 ## End of ace release
 
