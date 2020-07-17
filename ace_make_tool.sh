@@ -55,34 +55,55 @@ else
     exit 1 
 fi
 
+echo "
+#include <ace/managers/state.h>
 
+#define GAME_STATE_COUNT 1
+
+extern tStateManager *g_pGameStateManager;
+extern tState *g_pGameStates[];
+" >> ${SRCDIR}/main.h
+echo "${SRCDIR}/main.h created"
 
 echo "
 #include <ace/generic/main.h>
 #include <ace/managers/key.h>
+#include <ace/managers/state.h>
 
 // Without it compiler will yell about undeclared gameGsCreate etc
+#include \"main.h\"
 #include \"${PROJECTNAME}.h\"
 
-void genericCreate(void) {
+tStateManager *g_pGameStateManager = 0;
+tState *g_pGameStates[GAME_STATE_COUNT] = {0};
+
+void genericCreate(void) 
+{
   // Here goes your startup code
     logWrite(\"Hello, Amiga!\n\");
       keyCreate(); // We'll use keyboard
-        // Initialize gamestate
-	  gamePushState(gameGsCreate, gameGsLoop, gameGsDestroy);
-  }
-
-  void genericProcess(void) {
-    // Here goes code done each game frame
-      keyProcess();
-        gameProcess(); // Process current gamestate's loop
+      g_pGameStateManager = stateManagerCreate();
+      g_pGameStates[0] = stateCreate(gameGsCreate, gameGsLoop, gameGsDestroy, 0, 0, 0);
+      statePush(g_pGameStateManager, g_pGameStates[0]);
 }
 
-void genericDestroy(void) {
+void genericProcess(void) 
+{
+    // Here goes code done each game frame
+      keyProcess();
+      stateProcess(g_pGameStateManager);
+}
+
+void genericDestroy(void) 
+{
   // Here goes your cleanup code
-    keyDestroy(); // We don't need it anymore
-      logWrite(\"Goodbye, Amiga!\n\");
-      }
+  
+  stateManagerDestroy(g_pGameStateManager);
+  stateDestroy(g_pGameStates[0]);
+  
+  keyDestroy(); // We don't need it anymore
+  logWrite(\"Goodbye, Amiga!\n\");
+}
 " >> ${SRCDIR}/main.c
 echo "${SRCDIR}/main.c created"
 
@@ -91,7 +112,7 @@ then
 
 echo "#include \"${PROJECTNAME}.h\"
 #include <ace/managers/key.h> // Keyboard processing
-#include <ace/managers/game.h> // For using gameClose
+#include <ace/managers/game.h> // For using gameExit
 #include <ace/managers/system.h> // For systemUnuse and systemUse
 #include <ace/managers/viewport/simplebuffer.h> // Simple buffer
 
@@ -156,12 +177,14 @@ void gameGsLoop(void) {
   // This will loop forever until you \"pop\" or change gamestate
   // or close the game
   if(keyCheck(KEY_ESCAPE)) {
-    gameClose();
+    gameExit();
   }
   else {
     // Process loop normally
     // We'll come back here later
   }
+  
+  vPortWaitForEnd(s_pVpMain);
 }
 
 void gameGsDestroy(void) {
@@ -177,7 +200,7 @@ else
 
 echo "#include \"${PROJECTNAME}.h\"
 #include <ace/managers/key.h> // Keyboard processing
-#include <ace/managers/game.h> // For using gameClose
+#include <ace/managers/game.h> // For using gameExit
 #include <ace/managers/system.h> // For systemUnuse and systemUse
 #include <ace/managers/viewport/simplebuffer.h> // Simple buffer
 
@@ -218,7 +241,7 @@ void gameGsCreate(void) {
     TAG_SIMPLEBUFFER_VPORT, s_pVpMain, // Required: parent viewport
     TAG_SIMPLEBUFFER_BITMAP_FLAGS, BMF_CLEAR,
     TAG_SIMPLEBUFFER_COPLIST_OFFSET, 0, 
-    TAG_SIMPLEBUFFER_IS_DBLBUF, 1,
+    TAG_SIMPLEBUFFER_IS_DBLBUF, 0,
   TAG_END);
   
   s_uwCopRawOffs = simpleBufferGetRawCopperlistInstructionCount(BITPLANES);
@@ -250,12 +273,13 @@ void gameGsLoop(void) {
   // This will loop forever until you \"pop\" or change gamestate
   // or close the game
   if(keyCheck(KEY_ESCAPE)) {
-    gameClose();
+    gameExit();
   }
   else {
     // Process loop normally
     // We'll come back here later
   }
+  vPortWaitForEnd(s_pVpMain);
 }
 
 void gameGsDestroy(void) {
