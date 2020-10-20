@@ -70,7 +70,6 @@ echo "
 #include <ace/managers/key.h>
 #include <ace/managers/state.h>
 
-// Without it compiler will yell about undeclared gameGsCreate etc
 #include \"main.h\"
 #include \"${PROJECTNAME}.h\"
 
@@ -83,7 +82,7 @@ void genericCreate(void)
     logWrite(\"Hello, Amiga!\n\");
       keyCreate(); // We'll use keyboard
       g_pGameStateManager = stateManagerCreate();
-      g_pGameStates[0] = stateCreate(gameGsCreate, gameGsLoop, gameGsDestroy, 0, 0, 0);
+      g_pGameStates[0] = stateCreate(${PROJECTNAME}GsCreate, ${PROJECTNAME}GsLoop, ${PROJECTNAME}GsDestroy, 0, 0, 0);
       statePush(g_pGameStateManager, g_pGameStates[0]);
 }
 
@@ -127,7 +126,7 @@ static tSimpleBufferManager *s_pScoreBuffer;
 static tVPort *s_pVpMain; // Viewport for playfield
 static tSimpleBufferManager *s_pMainBuffer;
 
-void gameGsCreate(void) {
+void ${PROJECTNAME}GsCreate(void) {
   // Create a view - first arg is always zero, then it's option-value
   s_pView = viewCreate(0,
     TAG_VIEW_GLOBAL_CLUT, 1, // Same Color LookUp Table for all viewports
@@ -173,21 +172,18 @@ void gameGsCreate(void) {
   viewLoad(s_pView);
 }
 
-void gameGsLoop(void) {
+void ${PROJECTNAME}GsLoop(void) {
   // This will loop forever until you \"pop\" or change gamestate
   // or close the game
   if(keyCheck(KEY_ESCAPE)) {
     gameExit();
-  }
-  else {
-    // Process loop normally
-    // We'll come back here later
+    return ;
   }
   
   vPortWaitForEnd(s_pVpMain);
 }
 
-void gameGsDestroy(void) {
+void ${PROJECTNAME}GsDestroy(void) {
   // Cleanup when leaving this gamestate
   systemUse();
 
@@ -217,7 +213,7 @@ static tSimpleBufferManager *s_pMainBuffer;
 static UWORD s_uwCopRawOffs=0;
 static tCopCmd *pCopCmds;
 
-void gameGsCreate(void) {
+void ${PROJECTNAME}GsCreate(void) {
   ULONG ulRawSize = (simpleBufferGetRawCopperlistInstructionCount(BITPLANES) +
                  32 * 3 + // 32 bars - each consists of WAIT + 2 MOVE instruction
                  1 +      // Final WAIT
@@ -269,20 +265,17 @@ void gameGsCreate(void) {
   viewLoad(s_pView);
 }
 
-void gameGsLoop(void) {
+void ${PROJECTNAME}GsLoop(void) {
   // This will loop forever until you \"pop\" or change gamestate
   // or close the game
   if(keyCheck(KEY_ESCAPE)) {
     gameExit();
-  }
-  else {
-    // Process loop normally
-    // We'll come back here later
+    return ;
   }
   vPortWaitForEnd(s_pVpMain);
 }
 
-void gameGsDestroy(void) {
+void ${PROJECTNAME}GsDestroy(void) {
   // Cleanup when leaving this gamestate
   systemUse();
 
@@ -299,11 +292,11 @@ echo "#ifndef _"$PROJECTNAME"_H_
 // Function headers from game.c go here
 // It's best to put here only those functions which are needed in other files.
 
-void gameGsCreate(void);
+void ${PROJECTNAME}GsCreate(void);
 
-void gameGsLoop(void);
+void ${PROJECTNAME}GsLoop(void);
 
-void gameGsDestroy(void);
+void ${PROJECTNAME}GsDestroy(void);
 
 #endif // _$PROJECTNAME_H_" >> ${SRCDIR}/${PROJECTNAME}.h
 echo "${SRCDIR}/${PROJECTNAME}.h created"
