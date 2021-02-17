@@ -11,7 +11,7 @@ FROM ozzyboshi/bebbo-amiga-gcc:20210218 as build-env
 
 ## Start of ACE release
 
-FROM ubuntu:18.04 as ace-env
+FROM ubuntu:20.04 as ace-env
 
 COPY --from=build-env /opt/amiga ./opt/amiga
 
