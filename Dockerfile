@@ -7,7 +7,7 @@
 # "ixemul" 
 # "newlib"
 
-FROM ozzyboshi/bebbo-amiga-gcc:20200526 as build-env
+FROM ozzyboshi/bebbo-amiga-gcc:20210217 as build-env
 
 ## Start of ACE release
 
