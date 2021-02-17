@@ -41,6 +41,8 @@ RUN sed -i 's/s_pHwVectors[SYSTEM_INT_VECTOR_FIRST + i] = s_pAceHwInterrupts[i];
 RUN git clone https://github.com/AmigaPorts/AmigaCMakeCrossToolchains.git 
 
 RUN cd ACE/tools && mkdir build
+WORKDIR /root/ACE/tools
+RUN sed -i "s/set (CMAKE_CXX_STANDARD 17)/cset (CMAKE_CXX_STANDARD 20)/" CMakeLists.txt
 WORKDIR /root/ACE/tools/build
 RUN  cmake .. && make
 
