@@ -1,10 +1,11 @@
 # Docker image for ACE Game engine
 
-FROM ozzyboshi/bebbo-amiga-gcc:20200203
+FROM ozzyboshi/bebbo-amiga-gcc:20200930
 #FROM bebbotest
 MAINTAINER Ozzyboshi <gun101@email.it>
 
 ARG ace_branch=master
+ARG ace_crt_function=nix20
 
 # Passare --build-arg ace_releasetype=Debug per avere il debug
 ARG ace_releasetype=Release
@@ -47,7 +48,9 @@ RUN mkdir ACE/tools/palette_conv && cp ACE/tools/bin/palette_conv /root/ACE/tool
 WORKDIR /root
 RUN cd ACE/ && mkdir build
 WORKDIR /root/ACE/build
-RUN M68K_TOOLCHAIN_PATH=/bin cmake .. -DCMAKE_TOOLCHAIN_FILE=/root/AmigaCMakeCrossToolchains/m68k-amigaos.cmake -DM68K_TOOLCHAIN_PATH=/opt/amiga -DTOOLCHAIN_PREFIX=m68k-amigaos  -DTOOLCHAIN_PREFIX_DASHED=m68k-amigaos- -DM68K_CPU=68000 -DM68K_FPU=soft -DCMAKE_BUILD_TYPE=${ace_releasetype}
+#RUN M68K_TOOLCHAIN_PATH=/bin cmake .. -DCMAKE_TOOLCHAIN_FILE=/root/AmigaCMakeCrossToolchains/m68k-amigaos.cmake -DM68K_TOOLCHAIN_PATH=/opt/amiga -DTOOLCHAIN_PREFIX=m68k-amigaos  -DTOOLCHAIN_PREFIX_DASHED=m68k-amigaos- -DM68K_CPU=68000 -DM68K_FPU=soft -DCMAKE_BUILD_TYPE=${ace_releasetype}
+RUN M68K_TOOLCHAIN_PATH=/bin cmake .. -DM68K_CRT=${ace_crt_function} -DCMAKE_TOOLCHAIN_FILE=/root/AmigaCMakeCrossToolchains/m68k-amigaos.cmake -DTOOLCHAIN_PATH=/opt/amiga -DTOOLCHAIN_PREFIX=m68k-amigaos -DM68K_CPU=68000 -DM68K_FPU=soft
+
 RUN make
 
 # Copy ace static library

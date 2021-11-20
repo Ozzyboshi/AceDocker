@@ -7,11 +7,11 @@
 # "ixemul" 
 # "newlib"
 
-FROM ozzyboshi/bebbo-amiga-gcc:20200526 as build-env
+FROM ozzyboshi/bebbo-amiga-gcc:20210218 as build-env
 
 ## Start of ACE release
 
-FROM ubuntu:18.04 as ace-env
+FROM ubuntu:20.04 as ace-env
 
 COPY --from=build-env /opt/amiga ./opt/amiga
 
@@ -35,14 +35,14 @@ RUN cd fmt && mkdir build && cd build && cmake .. && make && make install
 
 WORKDIR /root
 RUN git clone https://github.com/AmigaPorts/ACE.git && cd ACE && git checkout ${ace_branch}
-RUN sed -i 's/INTF_PORTS | INTF_AUD0 | INTF_AUD1 | INTF_AUD2 | INTF_AUD3/INTF_PORTS/'  /root/ACE/src/ace/managers/system.c
-RUN sed -i 's/s_pHwVectors[SYSTEM_INT_VECTOR_FIRST + i] = s_pAceHwInterrupts[i];/if (i<4) s_pHwVectors[SYSTEM_INT_VECTOR_FIRST + i] = s_pAceHwInterrupts[i];/' /root/ACE/src/ace/managers/system.c
+# RUN sed -i 's/INTF_PORTS | INTF_AUD0 | INTF_AUD1 | INTF_AUD2 | INTF_AUD3/INTF_PORTS/'  /root/ACE/src/ace/managers/system.c
+# RUN sed -i 's/s_pHwVectors[SYSTEM_INT_VECTOR_FIRST + i] = s_pAceHwInterrupts[i];/if (i<4) s_pHwVectors[SYSTEM_INT_VECTOR_FIRST + i] = s_pAceHwInterrupts[i];/' /root/ACE/src/ace/managers/system.c
 
 RUN git clone https://github.com/AmigaPorts/AmigaCMakeCrossToolchains.git 
 
 RUN cd ACE/tools && mkdir build
 WORKDIR /root/ACE/tools/build
-RUN  cmake .. && make
+RUN  cmake .. && make clean && make
 
 # fix utils path
 WORKDIR /root
@@ -52,7 +52,6 @@ WORKDIR /root
 RUN cd ACE/ && mkdir build
 WORKDIR /root/ACE/build
 RUN M68K_TOOLCHAIN_PATH=/bin cmake .. -DM68K_CRT=${ace_crt_function} -DCMAKE_TOOLCHAIN_FILE=/root/AmigaCMakeCrossToolchains/m68k-amigaos.cmake -DTOOLCHAIN_PATH=/opt/amiga -DTOOLCHAIN_PREFIX=m68k-amigaos -DM68K_CPU=68000 -DM68K_FPU=soft
-RUN M68K_TOOLCHAIN_PATH=/bin cmake .. -DM68K_CRT=${ace_crt_function} -DCMAKE_TOOLCHAIN_FILE=/root/AmigaCMakeCrossToolchains/m68k-amigaos.cmake -DTOOLCHAIN_PATH=/opt/amiga -DTOOLCHAIN_PREFIX=m68k-amigaos -DM68K_CPU=68000 -DM68K_FPU=soft
 RUN make --trace
 
 WORKDIR /root
@@ -60,12 +59,19 @@ RUN cd ACE/showcase && mkdir build
 WORKDIR /root/ACE/showcase/build
 RUN M68K_TOOLCHAIN_PATH=/bin cmake .. -DM68K_CRT=${ace_crt_function} -DCMAKE_TOOLCHAIN_FILE=/root/AmigaCMakeCrossToolchains/m68k-amigaos.cmake -DTOOLCHAIN_PATH=/opt/amiga -DTOOLCHAIN_PREFIX=m68k-amigaos -DM68K_CPU=68000 -DM68K_FPU=soft
 RUN make
+
+WORKDIR /root/ACE/build
+RUN make --trace
+RUN ls -ls /root/ACE/build/*
+RUN apt-get update && apt-get install -y locate
+RUN updatedb
+RUN find / -name libace.a
 ## End of ace regular
 
 
 ## Start of ACE debug
 
-FROM ubuntu:18.04 as acedebug-env
+FROM ubuntu:20.04 as acedebug-env
 
 COPY --from=build-env /opt/amiga ./opt/amiga
 
@@ -79,8 +85,8 @@ WORKDIR /root
 
 WORKDIR /root
 RUN git clone https://github.com/AmigaPorts/ACE.git && cd ACE && git checkout ${ace_branch}
-RUN sed -i 's/INTF_PORTS | INTF_AUD0 | INTF_AUD1 | INTF_AUD2 | INTF_AUD3/INTF_PORTS/'  /root/ACE/src/ace/managers/system.c
-RUN sed -i 's/s_pHwVectors[SYSTEM_INT_VECTOR_FIRST + i] = s_pAceHwInterrupts[i];/if (i<4) s_pHwVectors[SYSTEM_INT_VECTOR_FIRST + i] = s_pAceHwInterrupts[i];/' /root/ACE/src/ace/managers/system.c
+# RUN sed -i 's/INTF_PORTS | INTF_AUD0 | INTF_AUD1 | INTF_AUD2 | INTF_AUD3/INTF_PORTS/'  /root/ACE/src/ace/managers/system.c
+# RUN sed -i 's/s_pHwVectors[SYSTEM_INT_VECTOR_FIRST + i] = s_pAceHwInterrupts[i];/if (i<4) s_pHwVectors[SYSTEM_INT_VECTOR_FIRST + i] = s_pAceHwInterrupts[i];/' /root/ACE/src/ace/managers/system.c
 
 RUN git clone https://github.com/AmigaPorts/AmigaCMakeCrossToolchains.git 
 
@@ -88,12 +94,12 @@ WORKDIR /root
 RUN cd ACE/ && mkdir build
 WORKDIR /root/ACE/build
 RUN M68K_TOOLCHAIN_PATH=/bin cmake .. -DM68K_CRT=${ace_crt_function} -DCMAKE_TOOLCHAIN_FILE=/root/AmigaCMakeCrossToolchains/m68k-amigaos.cmake -DTOOLCHAIN_PATH=/opt/amiga -DTOOLCHAIN_PREFIX=m68k-amigaos  -DM68K_CPU=68000 -DM68K_FPU=soft -DCMAKE_BUILD_TYPE=Debug -DACE_DEBUG=1
-RUN M68K_TOOLCHAIN_PATH=/bin cmake .. -DM68K_CRT=${ace_crt_function} -DCMAKE_TOOLCHAIN_FILE=/root/AmigaCMakeCrossToolchains/m68k-amigaos.cmake -DTOOLCHAIN_PATH=/opt/amiga -DTOOLCHAIN_PREFIX=m68k-amigaos  -DM68K_CPU=68000 -DM68K_FPU=soft -DCMAKE_BUILD_TYPE=Debug -DACE_DEBUG=1
+# RUN M68K_TOOLCHAIN_PATH=/bin cmake .. -DM68K_CRT=${ace_crt_function} -DCMAKE_TOOLCHAIN_FILE=/root/AmigaCMakeCrossToolchains/m68k-amigaos.cmake -DTOOLCHAIN_PATH=/opt/amiga -DTOOLCHAIN_PREFIX=m68k-amigaos  -DM68K_CPU=68000 -DM68K_FPU=soft -DCMAKE_BUILD_TYPE=Debug -DACE_DEBUG=1
 RUN make --trace
 ## End of ace debug
 
 ## Start of ACE release
-FROM ubuntu:18.04 as acerelease-env
+FROM ubuntu:20.04 as acerelease-env
 
 COPY --from=build-env /opt/amiga ./opt/amiga
 
@@ -105,8 +111,8 @@ RUN apt-get update && apt-get -y install git make g++ gcc cmake && rm -rf /var/l
 
 WORKDIR /root
 RUN git clone https://github.com/AmigaPorts/ACE.git && cd ACE && git checkout ${ace_branch}
-RUN sed -i 's/INTF_PORTS | INTF_AUD0 | INTF_AUD1 | INTF_AUD2 | INTF_AUD3/INTF_PORTS/'  /root/ACE/src/ace/managers/system.c
-RUN sed -i 's/s_pHwVectors[SYSTEM_INT_VECTOR_FIRST + i] = s_pAceHwInterrupts[i];/if (i<4) s_pHwVectors[SYSTEM_INT_VECTOR_FIRST + i] = s_pAceHwInterrupts[i];/' /root/ACE/src/ace/managers/system.c
+# RUN sed -i 's/INTF_PORTS | INTF_AUD0 | INTF_AUD1 | INTF_AUD2 | INTF_AUD3/INTF_PORTS/'  /root/ACE/src/ace/managers/system.c
+# RUN sed -i 's/s_pHwVectors[SYSTEM_INT_VECTOR_FIRST + i] = s_pAceHwInterrupts[i];/if (i<4) s_pHwVectors[SYSTEM_INT_VECTOR_FIRST + i] = s_pAceHwInterrupts[i];/' /root/ACE/src/ace/managers/system.c
 
 RUN git clone https://github.com/AmigaPorts/AmigaCMakeCrossToolchains.git 
 
@@ -114,12 +120,12 @@ WORKDIR /root
 RUN cd ACE/ && mkdir build
 WORKDIR /root/ACE/build
 RUN M68K_TOOLCHAIN_PATH=/bin cmake .. -DCMAKE_TOOLCHAIN_FILE=/root/AmigaCMakeCrossToolchains/m68k-amigaos.cmake -DTOOLCHAIN_PATH=/opt/amiga -DTOOLCHAIN_PREFIX=m68k-amigaos  -DM68K_CPU=68000 -DM68K_FPU=soft -DCMAKE_BUILD_TYPE=Release -DM68K_CRT=${ace_crt_function}
-RUN M68K_TOOLCHAIN_PATH=/bin cmake .. -DCMAKE_TOOLCHAIN_FILE=/root/AmigaCMakeCrossToolchains/m68k-amigaos.cmake -DTOOLCHAIN_PATH=/opt/amiga -DTOOLCHAIN_PREFIX=m68k-amigaos  -DM68K_CPU=68000 -DM68K_FPU=soft -DCMAKE_BUILD_TYPE=Release -DM68K_CRT=${ace_crt_function}
+# RUN M68K_TOOLCHAIN_PATH=/bin cmake .. -DCMAKE_TOOLCHAIN_FILE=/root/AmigaCMakeCrossToolchains/m68k-amigaos.cmake -DTOOLCHAIN_PATH=/opt/amiga -DTOOLCHAIN_PREFIX=m68k-amigaos  -DM68K_CPU=68000 -DM68K_FPU=soft -DCMAKE_BUILD_TYPE=Release -DM68K_CRT=${ace_crt_function}
 RUN make --trace
 
 ## End of ace release
 
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 MAINTAINER Ozzyboshi <gun101@email.it>
 
@@ -127,6 +133,7 @@ MAINTAINER Ozzyboshi <gun101@email.it>
 RUN apt-get update && apt-get -y install libmpc3 make autoconf && rm -rf /var/lib/apt/lists/*
 
 COPY --from=build-env /opt/amiga ./opt/amiga
+# COPY --from=ace-env /root/ACE/build /tmp/build
 COPY --from=ace-env /root/ACE/build/libace.a /opt/amiga/lib/
 COPY --from=ace-env /root/ACE/showcase /opt/amiga/showcase
 COPY --from=acedebug-env /root/ACE/build/libace.a /opt/amiga/lib/libacedebug.a
